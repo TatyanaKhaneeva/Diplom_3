@@ -44,7 +44,6 @@ class BasePage:
     @allure.step('Находим элемент и кликаем по нему')
     def find_element_and_click(self, locator):
         time.sleep(1)
-        #element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(locator))
         element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(locator))
         self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
         element.click()

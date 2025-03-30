@@ -46,10 +46,8 @@ class MainPage(BasePage):
     # Добавление ингредиента
     @allure.step('Добавляем ингредиент и проверяем счетчик')
     def add_ingredient_and_check_counter(self):
-        #self.wait_for_element(MainPageLocators.CREATE_BURGER_TEXT)
         self.wait_for_element(MainPageLocators.SAUCES_BUTTON)
         self.find_element_and_click(MainPageLocators.SAUCES_BUTTON)
-        #self.find_element_and_click(MainPageLocators.SPICY_SAUCE)
         self.drag_and_drop(MainPageLocators.SPICY_SAUCE, MainPageLocators.CONSTRUCTOR_FIELD)
         counter_element = self.find_element(MainPageLocators.COUNTER)
         assert counter_element.text == "1"

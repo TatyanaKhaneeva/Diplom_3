@@ -1,5 +1,4 @@
 import pytest
-
 from factory import WebDriverFactory
 from pages.login_page import LoginPage
 

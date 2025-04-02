@@ -5,6 +5,7 @@ from locators.forgot_password_page_locators import ForgotPasswordPageLocators
 from locators.main_page_locators import MainPageLocators
 
 
+
 class AccountPage(BasePage):
 
     # переход к личному кабинету
@@ -43,3 +44,5 @@ class AccountPage(BasePage):
         self.find_element_and_click(MainPageLocators.ACCOUNT_BUTTON)
         self.find_element_and_click(AccountPageLocators.EXIT_BUTTON)
         self.check_element_is_visible(ForgotPasswordPageLocators.EMAIL_FIELD)
+
+

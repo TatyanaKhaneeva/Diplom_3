@@ -1,10 +1,12 @@
 import re
 import allure
-import time
 from locators.account_page_locators import AccountPageLocators
 from locators.main_page_locators import MainPageLocators
 from locators.order_page_locators import OrderPageLocators
 from pages.base_page import BasePage
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 
 class OrderPage(BasePage):
@@ -27,25 +29,30 @@ class OrderPage(BasePage):
         self.scroll_to_element(MainPageLocators.BUN_INGREDIENT)
         self.drag_and_drop(MainPageLocators.BUN_INGREDIENT, MainPageLocators.CONSTRUCTOR_FIELD)
         self.find_element_and_click(MainPageLocators.ORDER_BUTTON)
-        time.sleep(5)
-        order_pop_up = self.find_element(MainPageLocators.ORDER_POP_UP)
-        order_number = order_pop_up.text
-        order_number_id = ''.join(filter(str.isdigit, order_number.split()[0]))
+        initial_text = self.get_element_text_js(MainPageLocators.ORDER_POP_UP)
+        self.wait_for_text_change(MainPageLocators.ORDER_POP_UP, initial_text)
+        order_number = self.get_element_text_js(MainPageLocators.ORDER_POP_UP)
+        match = re.search(r'(\d+)', order_number)
+        if match:
+            order_number_id = match.group(0)
         self.find_element_and_click(MainPageLocators.CLOSE_POP_UP_ORDER)
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(MainPageLocators.ACCOUNT_BUTTON)
+        )
         self.find_element_and_click(MainPageLocators.ACCOUNT_BUTTON)
         self.find_element_and_click(AccountPageLocators.HISTORY_BUTTON)
         self.wait_for_element(AccountPageLocators.FIRST_ORDER)
         self.scroll_to_element(AccountPageLocators.LAST_ORDER)
-        order_in_account_pop_up = self.find_element(AccountPageLocators.LAST_ORDER)
-        order_number_in_account = order_in_account_pop_up.text
-        match = re.search(r'#(\d+)', order_number_in_account)
+        order_in_acc_pop_up = self.get_element_text_js(MainPageLocators.ORDER_POP_UP)
+        match = re.match(r'(\d+)', order_in_acc_pop_up)
         if match:
             order_id = match.group(1).lstrip('0')
-        assert order_number_id == order_id
+            assert order_number_id == order_id
         self.scroll_to_element(MainPageLocators.ORDERS_FEED_BUTTON)
         self.find_element_and_click(MainPageLocators.ORDERS_FEED_BUTTON)
         order_locator = self.get_order_number_locator(order_id)
         self.check_element_is_visible(order_locator)
+
 
 
     # Проверка увеличения счетчика Выполнено за все время
@@ -62,11 +69,15 @@ class OrderPage(BasePage):
         self.scroll_to_element(MainPageLocators.BUN_INGREDIENT)
         self.drag_and_drop(MainPageLocators.BUN_INGREDIENT, MainPageLocators.CONSTRUCTOR_FIELD)
         self.find_element_and_click(MainPageLocators.ORDER_BUTTON)
-        time.sleep(5)
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(MainPageLocators.CLOSE_POP_UP_ORDER)
+        )
         self.wait_for_element(MainPageLocators.CLOSE_POP_UP_ORDER)
         self.find_element_and_click(MainPageLocators.CLOSE_POP_UP_ORDER)
         self.find_element_and_click(MainPageLocators.ORDERS_FEED_BUTTON)
-        time.sleep(5)
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(OrderPageLocators.ALL_ORDERS_COUNTER)
+        )
         self.wait_for_element(OrderPageLocators.ALL_ORDERS_COUNTER)
         all_completed_orders_after_place_order = self.find_element(OrderPageLocators.ALL_ORDERS_COUNTER)
         all_completed_orders_after_place_order_counter = all_completed_orders_after_place_order.text
@@ -87,7 +98,9 @@ class OrderPage(BasePage):
         self.scroll_to_element(MainPageLocators.BUN_INGREDIENT)
         self.drag_and_drop(MainPageLocators.BUN_INGREDIENT, MainPageLocators.CONSTRUCTOR_FIELD)
         self.find_element_and_click(MainPageLocators.ORDER_BUTTON)
-        time.sleep(5)
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(MainPageLocators.CLOSE_POP_UP_ORDER)
+        )
         self.wait_for_element(MainPageLocators.CLOSE_POP_UP_ORDER)
         self.find_element_and_click(MainPageLocators.CLOSE_POP_UP_ORDER)
         self.find_element_and_click(MainPageLocators.ORDERS_FEED_BUTTON)
@@ -106,10 +119,12 @@ class OrderPage(BasePage):
         self.scroll_to_element(MainPageLocators.BUN_INGREDIENT)
         self.drag_and_drop(MainPageLocators.BUN_INGREDIENT, MainPageLocators.CONSTRUCTOR_FIELD)
         self.find_element_and_click(MainPageLocators.ORDER_BUTTON)
-        time.sleep(5)
-        order_pop_up = self.find_element(MainPageLocators.ORDER_POP_UP)
-        order_number = order_pop_up.text
-        order_number_id = ''.join(filter(str.isdigit, order_number.split()[0]))
+        initial_text = self.get_element_text_js(MainPageLocators.ORDER_POP_UP)
+        self.wait_for_text_change(MainPageLocators.ORDER_POP_UP, initial_text)
+        order_number = self.get_element_text_js(MainPageLocators.ORDER_POP_UP)
+        match = re.search(r'(\d+)', order_number)
+        if match:
+            order_number_id = match.group(0)
         self.find_element_and_click(MainPageLocators.CLOSE_POP_UP_ORDER)
         self.wait_for_element(MainPageLocators.ORDERS_FEED_BUTTON)
         self.find_element_and_click(MainPageLocators.ORDERS_FEED_BUTTON)

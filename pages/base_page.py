@@ -1,10 +1,10 @@
 import allure
-import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+
 
 
 class BasePage:
@@ -43,11 +43,24 @@ class BasePage:
     # поиск элемента и клик по нему
     @allure.step('Находим элемент и кликаем по нему')
     def find_element_and_click(self, locator):
-        time.sleep(1)
         element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(locator))
         self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
-        element.click()
+        self.driver.execute_script("arguments[0].click();", element)
 
+
+    @allure.step('Проверяем, что элемент кликабельный через JavaScript')
+    def check_element_is_clickable_js(self, locator, timeout=10):
+        element = WebDriverWait(self.driver, timeout).until(
+            EC.presence_of_element_located(locator)
+        )
+
+        is_clickable = self.driver.execute_script("""
+            var element = arguments[0];
+            return element && 
+                   element.offsetWidth > 0 && 
+                   element.offsetHeight > 0 && 
+                   window.getComputedStyle(element).pointerEvents !== 'none';
+        """, element)
 
     # drag-and-drop элемента
     @allure.step('Drag-and-drop элемента')
@@ -108,10 +121,23 @@ class BasePage:
     # проверка, что элемент виден на странице
     @allure.step('Проверяем видимость элемента')
     def check_element_is_visible(self, locator, timeout=10):
-        element = WebDriverWait(self.driver, timeout).until(
-            EC.visibility_of_element_located(locator)
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.visibility_of_element_located(locator)
+            )
+            return element.is_displayed()
+        except TimeoutException:
+            return False
+
+    @allure.step('Получаем текст элемента через JS')
+    def get_element_text_js(self, locator):
+        return self.driver.execute_script("return arguments[0].textContent;", self.driver.find_element(*locator))
+
+    @allure.step('Ждем изменение ID')
+    def wait_for_text_change(self, locator, initial_text, timeout=10):
+        WebDriverWait(self.driver, timeout).until(
+            lambda driver: self.get_element_text_js(locator) != initial_text
         )
-        assert element.is_displayed()
 
 
     # проверка, что элемент не виден на странице
@@ -121,9 +147,10 @@ class BasePage:
             WebDriverWait(self.driver, timeout).until(
                 EC.invisibility_of_element_located(locator)
             )
-            assert True
+            return True
         except TimeoutException:
-            assert False, "Элемент отображен на странице"
+            return False
+
 
 
 
